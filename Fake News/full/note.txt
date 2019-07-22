@@ -1,0 +1,8 @@
+tn= berita hoax terklasifikasi hoax
+fn= berita hoax terklasifikasi real
+fp= berita real terklasifikasi hoax
+tn=berita real terklasifikasi real
+
+akurasi = berita yang terklasifikasi dengan benar/ semua berita
+precision = berita hoax terklasifikasi benar/ semua berita terklasifikasi hoax
+recall = berita hoax terklasifikasi hoax/semua berita hoax

@@ -1,0 +1,3 @@
+https://www.kaggle.com/rksriram312/fake-news-nlp-stuff/data
+https://github.com/JasonKessler/fakeout
+https://www.merdeka.com/tag/berita-hoax/

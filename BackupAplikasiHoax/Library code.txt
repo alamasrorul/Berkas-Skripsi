@@ -1,0 +1,160 @@
+import pymysql
+import Nlp
+import  math
+import openpyxl
+
+
+def library ():
+    loading=0;
+    Kata=[]
+    Weight=[]
+    Support=[]
+    Hasil=[]
+    # Open database connection
+    db = pymysql.connect("localhost", "xiinlaw", "Arcasevenvold04", "skripsi")
+
+    # prepare a cursor object using cursor() method
+    cursor = db.cursor()
+
+    # Prepare SQL query to INSERT a record into the database.
+    sql = "SELECT * FROM beritax "
+    try:
+        # Execute the SQL command
+        cursor.execute(sql)
+        # Fetch all the rows in a list of lists.
+        results = cursor.fetchall()
+
+
+        #Apriori+TF IDF
+        wk = openpyxl.Workbook()
+        # ADD new
+        sh = wk.active
+        row = 2
+        # sh.title = "kata"
+        for row in results:
+            id = row[0]
+            jdl = row[1]
+            berita = row[2]
+            jmlkata = row[3]
+
+        #proses pencarian atribut
+            hasilnlp= Nlp.Neuralp(berita)
+           # print(hasilnlp)
+
+            # Count List/Mencari TF
+            r = 0;
+            loading2=0
+            loading+=1
+            print((loading/50)*100," %")
+            #perulangan indexing kata
+            for g in hasilnlp:
+
+               Tf = hasilnlp.count(hasilnlp[r]) / len(hasilnlp)
+
+               # idf dan apriori
+
+               rr=0#count jumlah berita yg memiliki kata
+               cursor.execute(sql)
+               result = cursor.fetchall()
+               ri=0
+               #cari dg sql
+               # perulangan mencari jumlah berita yg mengandung kata
+               for row in result:
+
+                   id1= row[0]
+                   jdl1 = row[1]
+                   berita1 = row[2]
+                   jmlkata1 = row[3]
+                   hasilnlp2 = Nlp.Neuralp(berita1)
+                  #print(ri)
+                  # ri+=1
+
+                   r2 = 0;
+
+                   for gg in hasilnlp2:
+                        if(hasilnlp[r]==hasilnlp2[r2]):
+                            rr+=1
+                            break
+                        else:
+                           r2+=1
+
+               Idf = math.log(id1 / rr)
+               apriori = rr/id1
+               TfIdf=Tf*Idf
+
+               #penghilangan kata yang pernah muncul
+               if(hasilnlp[r] in Kata):
+                   continue
+               else:
+                   Kata.append(hasilnlp[r])
+                   Weight.append(TfIdf)
+                   Support.append(apriori)
+                   Hasil.append((TfIdf+apriori)/2)
+
+
+
+               #print(kata.value)
+
+     #          print('TF IDF')
+     #          print(hasilnlp[r],' : ',TfIdf)
+     #          print('Support Apriori ')
+
+    #           print(hasilnlp[r], ' : ', apriori)
+               # input kata on excel
+
+
+
+               #print('IDF : ',Idf)
+
+               #print(g, '   : ', hasilnlp.count(hasilnlp[r]), ', ')
+               #print(Tf)
+               r += 1
+
+
+        # Now print fetched result
+
+        #print(id, jdl, berita, jmlkata)
+
+
+    except:
+        print("Error: unable to fetch data")
+
+    # menutup koneksi ke server
+
+    db.close()
+
+
+    #Save on Excel
+    wk = openpyxl.Workbook()
+    # ADD new
+    sh = wk.active
+    sh.title='kata'
+    row = 1
+    r=0
+
+    for i in Kata:
+
+        # input kata on excel
+        kata = sh.cell(column=1, row=row)
+        kata.value = Kata[r]
+
+
+        # Weight
+        weight = sh.cell(column=2, row=row)
+        weight.value = Weight[r]
+
+        # Support
+        supp = sh.cell(column=3, row=row)
+        supp.value = Support[r]
+
+        # Hasil
+        hasil = sh.cell(column=4, row=row)
+        hasil.value = Hasil[r]
+
+        row += 1
+        r+=1
+
+        wk.save('kata.xlsx')
+    return Kata,Weight,Support,Hasil
+library()
+#print(library())
